@@ -3,9 +3,7 @@
 /public/build
 /public/hot
 /public/storage
-
 /vendor
-
 .phpactor.json
 .phpunit.result.cache
 Homestead.json

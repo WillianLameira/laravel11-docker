@@ -2,22 +2,26 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-
-Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('login', [AuthController::class, 'login']);
+use App\Http\Controllers\API\AuthController;
 
 
-Route::middleware('auth:api')->get('/users', function (Request $request) {
-    // Esta rota só poderá ser acessada se o token tiver o escopo 'view-users'
-    if ($request->user()->tokenCan('view-users')) {
-        return response()->json([
-            'users' => [
-                ['id' => 1, 'name' => 'User 1'],
-                ['id' => 2, 'name' => 'User 2'],
-            ]
-        ]);
-    }
+Route::get('/login', function () {
+    return response()->json(['message' => 'Para acessar essa rota é necessário estar autenticado'], 401);
+})->name('login');
 
-    return response()->json(['message' => 'Unauthorized'], 403);
+Route::group(['prefix' => 'v1'], function () {
+
+    Route::post('login', [AuthController::class, 'login']);
+
+
+    Route::middleware('auth:api')->group(function () {
+
+        Route::middleware('scopes:register-user')->group(function () {
+            Route::post('register', [AuthController::class, 'register'])->name('register.api');
+        });
+
+        Route::get('get-user', [AuthController::class, 'userInfo']);
+
+    });
+
 });
